@@ -2,16 +2,11 @@ package main
 
 import (
 	"fmt"
+	"gowrap/config"
 	"os"
-	"path/filepath"
 )
 
 var (
-	// targets for which to build
-	// TODO: Get list from config file.
-	gooses   = &[]string{"windows", "linux"}
-	goarches = &[]string{"amd64", "386"}
-
 	// name of the application
 	name = currentFolderName()
 
@@ -20,31 +15,27 @@ var (
 )
 
 func main() {
-	for _, goos := range *gooses {
-		for _, goarch := range *goarches {
-			fmt.Println("Building " + buildName(name, version, goos, goarch) + "...")
-			goGenerate()
-			goBuild(name, version, goos, goarch)
-		}
+	c := defaultConfig()
+	readOrSaveConfig(c)
+
+	for _, target := range *c.Targets {
+		goos, goarch := target.Parse()
+
+		fmt.Println("Building " + buildName(name, version, goos, goarch) + "...")
+		goGenerate()
+		goBuild(name, version, goos, goarch)
 	}
 }
 
-func panicIf(err error) {
-	if err != nil {
-		panic(err.Error())
+func readOrSaveConfig(c *Config) {
+	readErr, saveErr := config.ReadOrSave("gowrap.json", c)
+	if readErr != nil && saveErr != nil {
+		panicIf(saveErr)
 	}
-}
-
-// currentFolderName returns the folder name
-// of the current working directory
-func currentFolderName() string {
-	dir, err := os.Getwd()
-	panicIf(err)
-	return filepath.Base(dir)
-}
-
-// buildName returns a build-name in the form of appname-version-os-arch
-// ex: myapp-v1.0.0-linux-amd64
-func buildName(name string, version string, os string, arch string) string {
-	return name + "-" + version + "-" + os + "-" + arch
+	if readErr != nil && saveErr == nil {
+		fmt.Println("No 'gowrap.json' file found. " +
+			"A sample file was created in the current directory. " +
+			"Edit the file as required and re-run gowrap.")
+		os.Exit(0)
+	}
 }
