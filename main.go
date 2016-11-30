@@ -11,10 +11,16 @@ const (
 )
 
 var (
+	// targets for which to build
+	// TODO: Get list from config file.
 	gooses   = &[]string{"windows", "linux"}
 	goarches = &[]string{"amd64", "386"}
-	name     = currentFolderName()
-	version  = gitVersion()
+
+	// name of the application
+	name = currentFolderName()
+
+	// version of the application
+	version = gitVersion()
 )
 
 func main() {
@@ -22,7 +28,7 @@ func main() {
 
 	for _, goos := range *gooses {
 		for _, goarch := range *goarches {
-			buildName := name + "-" + version + "-" + goos + "-" + goarch
+			buildName := buildName(name, version, goos, goarch)
 
 			fmt.Println("Building " + buildName + "...")
 			goBuild(goos, goarch, buildName)
@@ -42,4 +48,10 @@ func currentFolderName() string {
 	dir, err := os.Getwd()
 	panicIf(err)
 	return filepath.Base(dir)
+}
+
+// buildName returns a build-name in the form of appname-version-os-arch
+// ex: myapp-v1.0.0-linux-amd64
+func buildName(name string, version string, os string, arch string) string {
+	return name + "-" + version + "-" + os + "-" + arch
 }
