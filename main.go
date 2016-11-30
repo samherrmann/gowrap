@@ -20,11 +20,10 @@ var (
 )
 
 func main() {
-	goGenerate()
-
 	for _, goos := range *gooses {
 		for _, goarch := range *goarches {
 			fmt.Println("Building " + buildName(name, version, goos, goarch) + "...")
+			goGenerate()
 			goBuild(name, version, goos, goarch)
 		}
 	}
