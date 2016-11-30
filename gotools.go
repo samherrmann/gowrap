@@ -13,12 +13,17 @@ func goGenerate() {
 // goBuild executes the command "go build" for the desired
 // target OS and architecture, and writes the generated
 // executable to the 'outDir' directory.
-func goBuild(goos string, goarch string, name string) {
+func goBuild(name string, version string, goos string, goarch string) {
 	os.Setenv("goos", goos)
 	os.Setenv("goarch", goarch)
 
-	out := filepath.Join(distRoot, name+exeSuffix())
+	out := distPath(name, version, goos, goarch)
 	cmd("go", "build", "-o", out, "-ldflags", "-X main.version="+version).Run()
+}
+
+// distPath constructs a file path for a given target
+func distPath(name string, version string, os string, arch string) string {
+	return filepath.Join("dist", buildName(name, version, os, arch), name+exeSuffix())
 }
 
 // exeSuffix returns ".exe" if the GOOS

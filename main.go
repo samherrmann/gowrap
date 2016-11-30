@@ -6,10 +6,6 @@ import (
 	"path/filepath"
 )
 
-const (
-	distRoot = "dist"
-)
-
 var (
 	// targets for which to build
 	// TODO: Get list from config file.
@@ -28,10 +24,8 @@ func main() {
 
 	for _, goos := range *gooses {
 		for _, goarch := range *goarches {
-			buildName := buildName(name, version, goos, goarch)
-
-			fmt.Println("Building " + buildName + "...")
-			goBuild(goos, goarch, buildName)
+			fmt.Println("Building " + buildName(name, version, goos, goarch) + "...")
+			goBuild(name, version, goos, goarch)
 		}
 	}
 }
