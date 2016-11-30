@@ -3,11 +3,13 @@ package main
 import "fmt"
 
 var (
-	// name of the application
-	name = currentFolderName()
+	// appName is the name of the
+	// application to be built.
+	appName = currentFolderName()
 
-	// version of the application
-	version = gitVersion()
+	// appVersion is the version of
+	// the application to be built.
+	appVersion = gitVersion()
 )
 
 func main() {
@@ -17,8 +19,8 @@ func main() {
 	for _, target := range *c.Targets {
 		goos, goarch := target.Parse()
 
-		fmt.Println("Building " + buildName(name, version, goos, goarch) + "...")
+		fmt.Println("Building " + buildName(appName, appVersion, goos, goarch) + "...")
 		goGenerate()
-		goBuild(name, version, goos, goarch)
+		goBuild(appName, appVersion, goos, goarch)
 	}
 }
