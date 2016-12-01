@@ -1,8 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"gowrap/config"
+	"gowrap/jsonfile"
 	"os"
 	"path/filepath"
 )
@@ -27,18 +28,33 @@ func buildName(name string, version string, os string, arch string) string {
 	return name + "-" + version + "-" + os + "-" + arch
 }
 
-// readOrSave attempts to read the configuration file. If it
-// cannot find the file, it will save a sample configuration
-// file instead.
-func readOrSaveConfig(c *Config) {
-	readErr, saveErr := config.ReadOrSave("gowrap.json", c)
-	if readErr != nil && saveErr != nil {
-		panicIf(saveErr)
+// readOrSave attempts to read the configuration file.
+// If it cannot find the file, it will save a sample
+// configuration file instead.
+func readOrSaveConfig() (*Config, error) {
+	c := NewConfig()
+	filePath := "gowrap.json"
+
+	if err := jsonfile.Read(filePath, c); err == nil {
+		return c, nil
 	}
-	if readErr != nil && saveErr == nil {
-		fmt.Println("No 'gowrap.json' file found. " +
-			"A sample file was created in the current directory. " +
-			"Edit the file as required and re-run gowrap.")
-		os.Exit(0)
+
+	c = NewConfig()
+	err := jsonfile.Write(filePath, c)
+	panicIf(err)
+
+	return nil, errors.New("No 'gowrap.json' file found. " +
+		"A sample file was created in the current directory. " +
+		"Edit the file as required and re-run gowrap.")
+}
+
+// runGoBuildChain executes the Go build tool-chain per configuration
+func runGoBuildChain(c *Config) {
+	for _, target := range *c.Targets {
+		goos, goarch := target.Parse()
+
+		fmt.Println("Building " + buildName(appName, appVersion, goos, goarch) + "...")
+		goGenerate()
+		goBuild(appName, appVersion, goos, goarch)
 	}
 }

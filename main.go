@@ -13,14 +13,12 @@ var (
 )
 
 func main() {
-	c := defaultConfig()
-	readOrSaveConfig(c)
 
-	for _, target := range *c.Targets {
-		goos, goarch := target.Parse()
-
-		fmt.Println("Building " + buildName(appName, appVersion, goos, goarch) + "...")
-		goGenerate()
-		goBuild(appName, appVersion, goos, goarch)
+	config, err := readOrSaveConfig()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
 	}
+
+	runGoBuildChain(config)
 }

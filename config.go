@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func defaultConfig() *Config {
+func NewConfig() *Config {
 	t := &[]Target{
 		Target(os.Getenv("GOOS") + "-" + os.Getenv("GOARCH")),
 	}
