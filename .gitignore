@@ -1,5 +1,3 @@
-*
-!LICENSE
-!/**/*.*
 *.exe
 gowrap.json
+/dist
