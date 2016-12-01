@@ -3,9 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
-	"gowrap/jsonfile"
 	"os"
 	"path/filepath"
+
+	"github.com/samherrmann/gowrap/jsonfile"
 )
 
 func panicIf(err error) {
