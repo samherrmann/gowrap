@@ -1,13 +1,10 @@
 package main
 
-import (
-	"os"
-	"strings"
-)
+import "strings"
 
 func NewConfig() *Config {
 	t := &[]Target{
-		Target(os.Getenv("GOOS") + "-" + os.Getenv("GOARCH")),
+		Target(goOS() + "-" + goArch()),
 	}
 	return &Config{
 		Targets: t,

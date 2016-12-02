@@ -35,3 +35,13 @@ func exeSuffix() string {
 	}
 	return ""
 }
+
+// goOS returns the value of GOOS
+func goOS() string {
+	return cmd("go", "env", "GOOS").OutputLine()
+}
+
+// goArch returns the value of GOARCH
+func goArch() string {
+	return cmd("go", "env", "GOARCH").OutputLine()
+}
