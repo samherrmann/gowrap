@@ -1,6 +1,9 @@
 package main
 
-import "os/exec"
+import (
+	"os/exec"
+	"strings"
+)
 
 // cmd returns a Cmd struct
 func cmd(name string, args ...string) *Cmd {
@@ -29,4 +32,11 @@ func (c *Cmd) Output() []byte {
 	out, err := c.Cmd.Output()
 	panicIf(err)
 	return out
+}
+
+// OutputLine calls Output on the command and
+// returns the first line of the standard output.
+func (c *Cmd) OutputLine() string {
+	out := c.Output()
+	return strings.TrimRight(string(out), "\n")
 }
