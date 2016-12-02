@@ -14,8 +14,8 @@ func goGenerate() {
 // target OS and architecture, and writes the generated
 // executable to the 'outDir' directory.
 func goBuild(name string, version string, goos string, goarch string) {
-	os.Setenv("goos", goos)
-	os.Setenv("goarch", goarch)
+	os.Setenv("GOOS", goos)
+	os.Setenv("GOARCH", goarch)
 
 	out := distPath(name, version, goos, goarch)
 	cmd("go", "build", "-o", out, "-ldflags", "-X main.version="+version).Run()
@@ -30,7 +30,7 @@ func distPath(name string, version string, os string, arch string) string {
 // environment variable is set to
 // "windows".
 func exeSuffix() string {
-	if os.Getenv("GOOS") == "windows" {
+	if goOS() == "windows" {
 		return ".exe"
 	}
 	return ""
