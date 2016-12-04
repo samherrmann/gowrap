@@ -1,10 +1,20 @@
 package main
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/samherrmann/gowrap/gotools"
+)
 
 func NewConfig() *Config {
+	goos, err := gotools.GetGoOS()
+	panicIf(err)
+
+	goarch, err := gotools.GetGoArch()
+	panicIf(err)
+
 	t := &[]Target{
-		Target(goOS() + "-" + goArch()),
+		Target(goos + "-" + goarch),
 	}
 	return &Config{
 		Targets: t,

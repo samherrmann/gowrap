@@ -1,47 +1,48 @@
 package main
 
 import (
-	"os"
+	"fmt"
 	"path/filepath"
+
+	"github.com/samherrmann/gowrap/gotools"
 )
+
+// runGoBuildChain executes the Go build tool-chain per configuration
+func runGoBuildChain(c *Config) {
+	for _, target := range *c.Targets {
+		goos, goarch := target.Parse()
+
+		fmt.Println("Building " + buildName(appName, appVersion, goos, goarch) + "...")
+		goGenerate()
+		goBuild(appName, appVersion, goos, goarch)
+	}
+}
 
 // goGenerate executes the command "go generate"
 func goGenerate() {
-	cmd("go", "generate").Run()
+	panicIf(gotools.Generate())
 }
 
 // goBuild executes the command "go build" for the desired
 // target OS and architecture, and writes the generated
 // executable to the 'outDir' directory.
 func goBuild(name string, version string, goos string, goarch string) {
-	os.Setenv("GOOS", goos)
-	os.Setenv("GOARCH", goarch)
+	panicIf(gotools.SetGoOS(goos))
+	panicIf(gotools.SetGoArch(goarch))
 
 	out := distPath(name, version, goos, goarch)
-	cmd("go", "build", "-o", out, "-ldflags", "-X main.version="+version).Run()
+	panicIf(gotools.Build("-o", out, "-ldflags", "-X main.version="+version))
 }
 
 // distPath constructs a file path for a given target
 func distPath(name string, version string, os string, arch string) string {
-	return filepath.Join("dist", buildName(name, version, os, arch), name+exeSuffix())
+	ext, err := gotools.ExeSuffix()
+	panicIf(err)
+	return filepath.Join("dist", buildName(name, version, os, arch), name+ext)
 }
 
-// exeSuffix returns ".exe" if the GOOS
-// environment variable is set to
-// "windows".
-func exeSuffix() string {
-	if goOS() == "windows" {
-		return ".exe"
-	}
-	return ""
-}
-
-// goOS returns the value of GOOS
-func goOS() string {
-	return cmd("go", "env", "GOOS").OutputLine()
-}
-
-// goArch returns the value of GOARCH
-func goArch() string {
-	return cmd("go", "env", "GOARCH").OutputLine()
+// buildName returns a build-name in the form of appname-version-os-arch
+// ex: myapp-v1.0.0-linux-amd64
+func buildName(name string, version string, os string, arch string) string {
+	return name + "-" + version + "-" + os + "-" + arch
 }
