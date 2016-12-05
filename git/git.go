@@ -1,9 +1,8 @@
 package git
 
 import (
-	osExec "os/exec"
-
-	"github.com/samherrmann/gowrap/exec"
+	"os/exec"
+	"strings"
 )
 
 const (
@@ -13,21 +12,17 @@ const (
 // TagOfHEAD returns the tag of HEAD if one exists. If no tag exists, and empty
 // string is returned.
 func TagOfHEAD() (string, error) {
-	if err := gitPath(); err != nil {
-		return "", err
-	}
-	return exec.Command(cmdName, "tag", "--contains", "HEAD").OutputLine()
+	return cmdOutput(cmdName, "tag", "--contains", "HEAD")
 }
 
 // HashOfHEAD returns the commit hash of HEAD.
 func HashOfHEAD() (string, error) {
-	if err := gitPath(); err != nil {
-		return "", err
-	}
-	return exec.Command(cmdName, "rev-parse", "--short", "HEAD").OutputLine()
+	return cmdOutput(cmdName, "rev-parse", "--short", "HEAD")
 }
 
-func gitPath() error {
-	_, err := osExec.LookPath("git")
-	return err
+// cmdOutput executes the command specified by name and
+// returns the first line of the standard output.
+func cmdOutput(name string, args ...string) (string, error) {
+	out, err := exec.Command(name, args...).Output()
+	return strings.TrimRight(string(out), "\n"), err
 }

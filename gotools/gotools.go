@@ -2,8 +2,8 @@ package gotools
 
 import (
 	"os"
-
-	"github.com/samherrmann/gowrap/exec"
+	"os/exec"
+	"strings"
 )
 
 const (
@@ -62,5 +62,12 @@ func ExeSuffix() (string, error) {
 // getGoEnvVar returns the value of the provided Go
 // environment variable
 func getGoEnvVar(envVar string) (string, error) {
-	return exec.Command(cmdName, "env", envVar).OutputLine()
+	return cmdOutput(cmdName, "env", envVar)
+}
+
+// cmdOutput executes the command specified by name and
+// returns the first line of the standard output.
+func cmdOutput(name string, args ...string) (string, error) {
+	out, err := exec.Command(name, args...).Output()
+	return strings.TrimRight(string(out), "\n"), err
 }
