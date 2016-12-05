@@ -25,22 +25,22 @@ func Build(args ...string) error {
 	return exec.Command(cmdName, args...).Run()
 }
 
-// GetGoOS returns the value of GOOS
-func GetGoOS() (string, error) {
-	return getGoEnvVar(envVarKeyGOOS)
+// GoOS returns the value of GOOS
+func GoOS() (string, error) {
+	return goEnvVar(envVarKeyGOOS)
 }
 
-// GetGoArch returns the value of GOARCH
-func GetGoArch() (string, error) {
-	return getGoEnvVar(envVarKeyGOARCH)
-}
-
-// SetGoOS returns the value of GOOS
+// SetGoOS sets the value of GOOS
 func SetGoOS(goos string) error {
 	return os.Setenv(envVarKeyGOOS, goos)
 }
 
-// SetGoArch returns the value of GOARCH
+// GoArch returns the value of GOARCH
+func GoArch() (string, error) {
+	return goEnvVar(envVarKeyGOARCH)
+}
+
+// SetGoArch sets the value of GOARCH
 func SetGoArch(goarch string) error {
 	return os.Setenv(envVarKeyGOARCH, goarch)
 }
@@ -49,7 +49,7 @@ func SetGoArch(goarch string) error {
 // environment variable is set to
 // "windows".
 func ExeSuffix() (string, error) {
-	goos, err := GetGoOS()
+	goos, err := GoOS()
 	if err != nil {
 		return "", err
 	}
@@ -59,10 +59,10 @@ func ExeSuffix() (string, error) {
 	return "", nil
 }
 
-// getGoEnvVar returns the value of the provided Go
+// goEnvVar returns the value of the provided Go
 // environment variable
-func getGoEnvVar(envVar string) (string, error) {
-	return cmdOutput(cmdName, "env", envVar)
+func goEnvVar(key string) (string, error) {
+	return cmdOutput(cmdName, "env", key)
 }
 
 // cmdOutput executes the command specified by name and

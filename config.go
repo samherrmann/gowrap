@@ -9,10 +9,10 @@ import (
 )
 
 func NewConfig() *Config {
-	goos, err := gotools.GetGoOS()
+	goos, err := gotools.GoOS()
 	panicIf(err)
 
-	goarch, err := gotools.GetGoArch()
+	goarch, err := gotools.GoArch()
 	panicIf(err)
 
 	t := &[]Target{
