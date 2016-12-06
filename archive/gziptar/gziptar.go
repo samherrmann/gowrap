@@ -5,7 +5,6 @@ import (
 	"compress/gzip"
 	"io"
 	"os"
-	"path/filepath"
 )
 
 // Make packages the files referenced by 'filePaths' into
@@ -41,17 +40,16 @@ func addFile(tw *tar.Writer, path string) error {
 	}
 	defer file.Close()
 
-	stat, err := file.Stat()
+	info, err := os.Stat(path)
 	if err != nil {
 		return err
 	}
 
 	// write header to tarball
-	header := new(tar.Header)
-	header.Name = filepath.Base(file.Name())
-	header.Size = stat.Size()
-	header.Mode = int64(stat.Mode())
-	header.ModTime = stat.ModTime()
+	header, err := tar.FileInfoHeader(info, "")
+	if err != nil {
+		return err
+	}
 	err = tw.WriteHeader(header)
 	if err != nil {
 		return err
