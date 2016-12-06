@@ -5,7 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"strings"
+
 	"github.com/samherrmann/gowrap/archive/gziptar"
+	"github.com/samherrmann/gowrap/archive/zip"
 )
 
 // archiveBuilds copies the buid-artifacts into
@@ -15,7 +18,12 @@ func archiveBuilds() {
 
 	fmt.Println("Archiving builds...")
 	for _, bp := range buildPaths() {
-		panicIf(gziptar.Make(filepath.Dir(bp), append(ap, bp)))
+		if isWindows(bp) {
+			panicIf(zip.Make(filepath.Dir(bp), append(ap, bp)))
+
+		} else {
+			panicIf(gziptar.Make(filepath.Dir(bp), append(ap, bp)))
+		}
 	}
 }
 
@@ -49,4 +57,10 @@ func assetPaths() []string {
 		}
 	}
 	return files
+}
+
+// isWindows returns true if the provided 'buildName'
+// contains the substring 'windows'
+func isWindows(buildName string) bool {
+	return strings.Contains(buildName, "windows")
 }
