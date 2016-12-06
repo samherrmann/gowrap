@@ -13,6 +13,8 @@ var (
 	// appVersion is the version of
 	// the application to be built.
 	appVersion = gitVersion()
+
+	outputRoot = "dist"
 )
 
 func main() {
@@ -25,4 +27,5 @@ func main() {
 	}
 
 	runGoBuildChain(config)
+	archiveBuilds()
 }
