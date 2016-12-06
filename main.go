@@ -14,6 +14,8 @@ var (
 	// the application to be built.
 	appVersion = gitVersion()
 
+	// outputRoot is the output directory
+	// for the build artifacts.
 	outputRoot = "dist"
 )
 

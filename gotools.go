@@ -30,15 +30,15 @@ func goBuild(name string, version string, goos string, goarch string) {
 	panicIf(gotools.SetGoOS(goos))
 	panicIf(gotools.SetGoArch(goarch))
 
-	out := distPath(name, version, goos, goarch)
-	panicIf(gotools.Build("-o", out, "-ldflags", "-X main.version="+version))
+	path := buildPath(name, version, goos, goarch)
+	panicIf(gotools.Build("-o", path, "-ldflags", "-X main.version="+version))
 }
 
-// distPath constructs a file path for a given target
-func distPath(name string, version string, os string, arch string) string {
+// buildPath constructs a file path for a given target
+func buildPath(name string, version string, os string, arch string) string {
 	ext, err := gotools.ExeSuffix()
 	panicIf(err)
-	return filepath.Join("dist", buildName(name, version, os, arch), name+ext)
+	return filepath.Join(outputRoot, buildName(name, version, os, arch), name+ext)
 }
 
 // buildName returns a build-name in the form of appname-version-os-arch
