@@ -8,19 +8,24 @@ import (
 	"github.com/samherrmann/gowrap/jsonfile"
 )
 
-func NewConfig() *Config {
+func NewConfig() (*Config, error) {
 	goos, err := gotools.GoOS()
-	panicIf(err)
+	if err != nil {
+		return nil, err
+	}
 
 	goarch, err := gotools.GoArch()
-	panicIf(err)
+	if err != nil {
+		return nil, err
+	}
 
 	t := &[]Target{
 		Target(goos + "-" + goarch),
 	}
-	return &Config{
+	c := &Config{
 		Targets: t,
 	}
+	return c, nil
 }
 
 type Config struct {
@@ -38,16 +43,29 @@ func (t *Target) Parse() (goos string, goarch string) {
 // If it cannot find the file, it will save a sample
 // configuration file instead.
 func readOrSaveConfig() (*Config, error) {
-	c := NewConfig()
 	filePath := "gowrap.json"
 
-	if err := jsonfile.Read(filePath, c); err == nil {
+	c, err := NewConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	err = jsonfile.Read(filePath, c)
+	if err == nil {
 		return c, nil
 	}
 
-	c = NewConfig()
-	err := jsonfile.Write(filePath, c)
-	panicIf(err)
+	// re-initialize c since the read operation
+	// above may have corrupted c.
+	c, err = NewConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	err = jsonfile.Write(filePath, c)
+	if err != nil {
+		return nil, err
+	}
 
 	return nil, errors.New("No 'gowrap.json' file found. " +
 		"A sample file was created in the current directory. " +

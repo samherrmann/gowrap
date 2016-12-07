@@ -6,14 +6,16 @@ import "github.com/samherrmann/gowrap/git"
 // - Git tag of the HEAD if one exists, or
 // - Commit hash of the HEAD, or
 // - Empty string if Git is not in the PATH.
-func gitVersion() string {
+func gitVersion() (string, error) {
 	tag, err := git.TagOfHEAD()
-	panicIf(err)
+	if err != nil {
+		return "", err
+	}
+
 	if tag != "" {
-		return tag
+		return tag, nil
 	}
 
 	hash, err := git.HashOfHEAD()
-	panicIf(err)
-	return hash
+	return hash, err
 }

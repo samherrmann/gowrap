@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -13,22 +13,35 @@ import (
 
 // archiveBuilds copies the buid-artifacts into
 // archive files for every distribution target
-func archiveBuilds() {
-	ap := assetPaths()
+func archiveBuilds() error {
+	log.Println("Archiving builds...")
 
-	fmt.Println("Archiving builds...")
-	for _, bp := range buildPaths() {
+	aps := assetPaths()
+
+	bps, err := buildPaths()
+	if err != nil {
+		return err
+	}
+
+	for _, bp := range bps {
 		if isWindows(bp) {
-			panicIf(zip.Make(filepath.Dir(bp), append(ap, bp)))
+			err := zip.Make(filepath.Dir(bp), append(aps, bp))
+			if err != nil {
+				return err
+			}
 
 		} else {
-			panicIf(gziptar.Make(filepath.Dir(bp), append(ap, bp)))
+			err := gziptar.Make(filepath.Dir(bp), append(aps, bp))
+			if err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }
 
 // buildPaths returns the paths of the built executables.
-func buildPaths() []string {
+func buildPaths() ([]string, error) {
 	paths := []string{}
 
 	walkFunc := func(path string, info os.FileInfo, err error) error {
@@ -38,8 +51,8 @@ func buildPaths() []string {
 		return err
 	}
 
-	panicIf(filepath.Walk(outputRoot, walkFunc))
-	return paths
+	err := filepath.Walk(outputRoot, walkFunc)
+	return paths, err
 }
 
 // assetPaths returns the paths of asset files,

@@ -1,28 +1,53 @@
 package main
 
-import "fmt"
+import "log"
 
-var (
-	// appName is the name of the
-	// application to be built.
-	appName = currentFolderName()
-
-	// appVersion is the version of
-	// the application to be built.
-	appVersion = gitVersion()
-
+const (
 	// outputRoot is the output directory
 	// for the build artifacts.
 	outputRoot = "dist"
 )
 
+var (
+	// appName is the name of the
+	// application to be built.
+	appName string
+
+	// appVersion is the version of
+	// the application to be built.
+	appVersion string
+)
+
 func main() {
-	config, err := readOrSaveConfig()
+	var err error
+
+	appName, err = currentFolderName()
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err)
 		return
 	}
 
-	runGoBuildChain(config)
-	archiveBuilds()
+	appVersion, err = gitVersion()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	config, err := readOrSaveConfig()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = runGoBuildChain(config)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = archiveBuilds()
+	if err != nil {
+		log.Println(err)
+		return
+	}
 }
