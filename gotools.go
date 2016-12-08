@@ -8,17 +8,16 @@ import (
 )
 
 // runGoBuildChain executes the Go build tool-chain per configuration
-func runGoBuildChain(t *[]gotools.Target) error {
-	for _, target := range *t {
-		goos, goarch := target.Parse()
+func runGoBuildChain(platforms *[]gotools.Platform) error {
+	for _, p := range *platforms {
 
-		log.Println("Building " + buildName(appName, appVersion, goos, goarch) + "...")
+		log.Println("Building " + buildName(appName, appVersion, &p) + "...")
 		err := goGenerate()
 		if err != nil {
 			return err
 		}
 
-		err = goBuild(appName, appVersion, goos, goarch)
+		err = goBuild(appName, appVersion, &p)
 		if err != nil {
 			return err
 		}
@@ -34,18 +33,18 @@ func goGenerate() error {
 // goBuild executes the command "go build" for the desired
 // target OS and architecture, and writes the generated
 // executable to the 'outDir' directory.
-func goBuild(name string, version string, goos string, goarch string) error {
-	err := gotools.SetGoOS(goos)
+func goBuild(name string, version string, p *gotools.Platform) error {
+	err := gotools.SetGoOS(p.GOOS)
 	if err != nil {
 		return err
 	}
 
-	err = gotools.SetGoArch(goarch)
+	err = gotools.SetGoArch(p.GOARCH)
 	if err != nil {
 		return err
 	}
 
-	path, err := buildPath(name, version, goos, goarch)
+	path, err := buildPath(name, version, p)
 	if err != nil {
 		return err
 	}
@@ -54,16 +53,16 @@ func goBuild(name string, version string, goos string, goarch string) error {
 }
 
 // buildPath constructs a file path for a given target
-func buildPath(name string, version string, os string, arch string) (string, error) {
+func buildPath(name string, version string, p *gotools.Platform) (string, error) {
 	ext, err := gotools.ExeSuffix()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(outputRoot, buildName(name, version, os, arch), name+ext), err
+	return filepath.Join(outputRoot, buildName(name, version, p), name+ext), err
 }
 
 // buildName returns a build-name in the form of appname-version-os-arch
 // ex: myapp-v1.0.0-linux-amd64
-func buildName(name string, version string, os string, arch string) string {
-	return name + "-" + version + "-" + os + "-" + arch
+func buildName(name string, version string, p *gotools.Platform) string {
+	return name + "-" + version + "-" + p.GOOS + "-" + p.GOARCH
 }

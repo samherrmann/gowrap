@@ -39,7 +39,13 @@ func main() {
 		return
 	}
 
-	err = runGoBuildChain(config.Targets)
+	targetPlatforms, err := config.Targets.ToPlatforms()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = runGoBuildChain(targetPlatforms)
 	if err != nil {
 		log.Println(err)
 		return

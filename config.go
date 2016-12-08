@@ -7,28 +7,36 @@ import (
 	"github.com/samherrmann/gowrap/jsonfile"
 )
 
+// NewConfig returns a Config struct.
 func NewConfig() (*Config, error) {
-	goos, err := gotools.GoOS()
-	if err != nil {
-		return nil, err
-	}
+	t := gotools.NewPlatform()
 
-	goarch, err := gotools.GoArch()
-	if err != nil {
-		return nil, err
-	}
-
-	t := &[]gotools.Target{
-		gotools.NewTarget(goos, goarch),
-	}
 	c := &Config{
-		Targets: t,
+		Targets: &Targets{t.String()},
 	}
 	return c, nil
 }
 
+// Config represents the application configuration.
 type Config struct {
-	Targets *[]gotools.Target `json:"targets"`
+	Targets *Targets `json:"targets"`
+}
+
+// Targets is a slice of strings representing the
+// targeted platforms.
+type Targets []string
+
+// ToPlatforms convers the Targets slice to a gotools/Platform slice.
+func (t *Targets) ToPlatforms() (*[]gotools.Platform, error) {
+	ps := &[]gotools.Platform{}
+	for _, target := range *t {
+		p := gotools.NewPlatform()
+		if err := p.Unmarshal(target); err != nil {
+			return nil, err
+		}
+		*ps = append(*ps, *p)
+	}
+	return ps, nil
 }
 
 // readOrSave attempts to read the configuration file.
