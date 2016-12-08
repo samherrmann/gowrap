@@ -8,8 +8,8 @@ import (
 )
 
 // runGoBuildChain executes the Go build tool-chain per configuration
-func runGoBuildChain(c *Config) error {
-	for _, target := range *c.Targets {
+func runGoBuildChain(t *[]gotools.Target) error {
+	for _, target := range *t {
 		goos, goarch := target.Parse()
 
 		log.Println("Building " + buildName(appName, appVersion, goos, goarch) + "...")

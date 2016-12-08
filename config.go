@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/samherrmann/gowrap/gotools"
 	"github.com/samherrmann/gowrap/jsonfile"
@@ -19,8 +18,8 @@ func NewConfig() (*Config, error) {
 		return nil, err
 	}
 
-	t := &[]Target{
-		Target(goos + "-" + goarch),
+	t := &[]gotools.Target{
+		gotools.NewTarget(goos, goarch),
 	}
 	c := &Config{
 		Targets: t,
@@ -29,14 +28,7 @@ func NewConfig() (*Config, error) {
 }
 
 type Config struct {
-	Targets *[]Target `json:"targets"`
-}
-
-type Target string
-
-func (t *Target) Parse() (goos string, goarch string) {
-	s := strings.Split(string(*t), "-")
-	return s[0], s[1]
+	Targets *[]gotools.Target `json:"targets"`
 }
 
 // readOrSave attempts to read the configuration file.

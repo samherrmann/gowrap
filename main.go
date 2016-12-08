@@ -39,7 +39,7 @@ func main() {
 		return
 	}
 
-	err = runGoBuildChain(config)
+	err = runGoBuildChain(config.Targets)
 	if err != nil {
 		log.Println(err)
 		return
