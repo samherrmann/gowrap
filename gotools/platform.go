@@ -36,7 +36,7 @@ func (p *Platform) Unmarshal(str string) error {
 	sep := platformStrNotationSep
 
 	if !strings.Contains(str, sep) {
-		return errors.New("String " + str + " is not in the format of GOOS-GOARCH")
+		return errors.New("String \"" + str + "\" is not in the format of GOOS-GOARCH")
 	}
 
 	s := strings.Split(str, sep)
@@ -50,7 +50,7 @@ func (p *Platform) Unmarshal(str string) error {
 			return nil
 		}
 	}
-	return errors.New("The string does not represent a supported platform")
+	return errors.New("The string \"" + str + "\" does not represent a supported platform")
 }
 
 // String returns a Platform struct in string notation.
