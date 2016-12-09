@@ -5,7 +5,7 @@ A packaging tool for apps developed in Go.
 * Creates multi-platform builds without a Makefile.
 * Versions your app during the build (uses Git `tag` for release, Git commit `hash` for development).
 * Adds builds to compressed archives (`.zip` for Windows builds, `.tar.gz` for others).
-* Generates cleanly structured archive file names (`appname-version-goos-goarch.ext`).
+* Generates cleanly structured archive file names in the form of `appname-version-goos-goarch.ext`.
 * Runs on any Go-supported platform.
 
 ## Installation
