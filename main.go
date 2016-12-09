@@ -40,13 +40,13 @@ func main() {
 		return
 	}
 
-	err = runGoBuildChain(config.Platforms())
+	buildPaths, err := runGoBuildChain(config.Platforms())
 	if err != nil {
 		log.Printf("Error while running Go build chain: %v", err)
 		return
 	}
 
-	err = archiveBuilds()
+	err = archiveBuilds(buildPaths)
 	if err != nil {
 		log.Printf("Error while archiving builds: %v", err)
 		return

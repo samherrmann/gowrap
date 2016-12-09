@@ -7,22 +7,26 @@ import (
 	"github.com/samherrmann/gowrap/gotools"
 )
 
-// runGoBuildChain executes the Go build tool-chain per configuration
-func runGoBuildChain(platforms *[]gotools.Platform) error {
-	for _, p := range *platforms {
+// runGoBuildChain executes the Go build tool-chain per configuration.
+// If no errors are encountered, it returns the paths to the resulting
+// executables.
+func runGoBuildChain(platforms *[]gotools.Platform) (*[]string, error) {
+	paths := &[]string{}
 
+	for _, p := range *platforms {
 		log.Println("Building " + buildName(appName, appVersion, &p) + "...")
 		err := goGenerate()
 		if err != nil {
-			return err
+			return nil, err
 		}
 
-		err = goBuild(appName, appVersion, &p)
+		path, err := goBuild(appName, appVersion, &p)
 		if err != nil {
-			return err
+			return nil, err
 		}
+		*paths = append(*paths, path)
 	}
-	return nil
+	return paths, nil
 }
 
 // goGenerate executes the command "go generate"
@@ -30,26 +34,25 @@ func goGenerate() error {
 	return gotools.Generate()
 }
 
-// goBuild executes the command "go build" for the desired
-// target OS and architecture, and writes the generated
-// executable to the 'outDir' directory.
-func goBuild(name string, version string, p *gotools.Platform) error {
+// goBuild executes the command "go build" for the desired target OS and architecture.
+// If no errors are encountered, it returns the path to the resulting executable.
+func goBuild(name string, version string, p *gotools.Platform) (string, error) {
 	err := gotools.SetGoOS(p.GOOS)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = gotools.SetGoArch(p.GOARCH)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	path, err := buildPath(name, version, p)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return gotools.Build("-o", path, "-ldflags", "-X main.version="+version)
+	return path, gotools.Build("-o", path, "-ldflags", "-X main.version="+version)
 }
 
 // buildPath constructs a file path for a given target

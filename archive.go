@@ -13,17 +13,12 @@ import (
 
 // archiveBuilds copies the buid-artifacts into
 // archive files for every distribution target
-func archiveBuilds() error {
+func archiveBuilds(buildPaths *[]string) error {
 	log.Println("Archiving builds...")
 
 	aps := assetPaths()
 
-	bps, err := buildPaths()
-	if err != nil {
-		return err
-	}
-
-	for _, bp := range bps {
+	for _, bp := range *buildPaths {
 		if isWindows(bp) {
 			err := zip.Make(filepath.Dir(bp), append(aps, bp))
 			if err != nil {
@@ -38,21 +33,6 @@ func archiveBuilds() error {
 		}
 	}
 	return nil
-}
-
-// buildPaths returns the paths of the built executables.
-func buildPaths() ([]string, error) {
-	paths := []string{}
-
-	walkFunc := func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
-			paths = append(paths, path)
-		}
-		return err
-	}
-
-	err := filepath.Walk(outputRoot, walkFunc)
-	return paths, err
 }
 
 // assetPaths returns the paths of asset files,
