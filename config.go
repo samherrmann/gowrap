@@ -48,7 +48,7 @@ func (c *Config) Load() error {
 	if err != nil {
 		return err
 	}
-	return errors.New("No 'gowrap.json' file found. " +
+	return errors.New("No '" + configFilePath + "' file found. " +
 		"A sample file was created in the current directory. " +
 		"Edit the file as required and re-run gowrap.")
 }
