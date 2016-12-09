@@ -23,7 +23,7 @@ func main() {
 
 	appName, err = currentFolderName()
 	if err != nil {
-		log.Printf("Error while getting folder name of current work directory: %v", err)
+		log.Printf("Error while getting folder name of current working directory: %v", err)
 		return
 	}
 
