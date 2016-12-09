@@ -15,7 +15,7 @@ var (
 
 	// appVersion is the version of
 	// the application to be built.
-	appVersion string
+	appVersion = "latest"
 )
 
 func main() {
