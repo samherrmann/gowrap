@@ -23,38 +23,38 @@ func main() {
 
 	appName, err = currentFolderName()
 	if err != nil {
-		log.Println(err)
+		log.Printf("Error while getting folder name of current work directory: %v", err)
 		return
 	}
 
 	appVersion, err = gitVersion()
 	if err != nil {
-		log.Println(err)
+		log.Printf("Error while getting version from Git: %v", err)
 		return
 	}
 
 	config := NewConfig()
 	err = config.Load()
 	if err != nil {
-		log.Println(err)
+		log.Printf("Error while loading config: %v", err)
 		return
 	}
 
 	targetPlatforms, err := config.Targets.ToPlatforms()
 	if err != nil {
-		log.Println(err)
+		log.Printf("Error while converting targets from config to platforms: %v", err)
 		return
 	}
 
 	err = runGoBuildChain(targetPlatforms)
 	if err != nil {
-		log.Println(err)
+		log.Printf("Error while running Go build chain: %v", err)
 		return
 	}
 
 	err = archiveBuilds()
 	if err != nil {
-		log.Println(err)
+		log.Printf("Error while archiving builds: %v", err)
 		return
 	}
 }
