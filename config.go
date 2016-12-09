@@ -18,14 +18,17 @@ func NewConfig() *Config {
 	t := gotools.NewPlatform()
 
 	c := &Config{
-		Targets: &Targets{t.String()},
+		Targets:   &[]string{t.String()},
+		platforms: &[]gotools.Platform{},
 	}
 	return c
 }
 
 // Config represents the application configuration.
 type Config struct {
-	Targets *Targets `json:"targets"`
+	Targets *[]string `json:"targets"`
+
+	platforms *[]gotools.Platform
 }
 
 // Save writes the Config struct to the
@@ -40,7 +43,10 @@ func (c *Config) Save() error {
 // before returning with an error.
 func (c *Config) Load() error {
 	err := jsonfile.Read(configFilePath, c)
-	if err == nil || !os.IsNotExist(err) {
+	if err == nil {
+		return c.validate()
+	}
+	if !os.IsNotExist(err) {
 		return err
 	}
 
@@ -53,19 +59,25 @@ func (c *Config) Load() error {
 		"Edit the file as required and re-run gowrap.")
 }
 
-// Targets is a slice of strings representing the
-// targeted platforms.
-type Targets []string
-
-// ToPlatforms convers the Targets slice to a gotools/Platform slice.
-func (t *Targets) ToPlatforms() (*[]gotools.Platform, error) {
+// validate verifies that the target values
+// are of proper format by unmarshaling them
+// to gotools/Plaform types.
+func (c *Config) validate() error {
 	ps := &[]gotools.Platform{}
-	for _, target := range *t {
+
+	for _, t := range *c.Targets {
 		p := gotools.NewPlatform()
-		if err := p.Unmarshal(target); err != nil {
-			return nil, err
+		if err := p.Unmarshal(t); err != nil {
+			return err
 		}
 		*ps = append(*ps, *p)
 	}
-	return ps, nil
+	c.platforms = ps
+	return nil
+}
+
+// Platforms returns the targets as a
+// gotools/Platform slice.
+func (c *Config) Platforms() *[]gotools.Platform {
+	return c.platforms
 }

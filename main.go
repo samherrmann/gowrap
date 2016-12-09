@@ -40,13 +40,7 @@ func main() {
 		return
 	}
 
-	targetPlatforms, err := config.Targets.ToPlatforms()
-	if err != nil {
-		log.Printf("Error while converting targets from config to platforms: %v", err)
-		return
-	}
-
-	err = runGoBuildChain(targetPlatforms)
+	err = runGoBuildChain(config.Platforms())
 	if err != nil {
 		log.Printf("Error while running Go build chain: %v", err)
 		return
