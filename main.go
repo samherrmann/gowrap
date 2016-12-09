@@ -33,7 +33,8 @@ func main() {
 		return
 	}
 
-	config, err := readOrSaveConfig()
+	config := NewConfig()
+	err = config.Load()
 	if err != nil {
 		log.Println(err)
 		return
