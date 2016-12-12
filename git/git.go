@@ -1,6 +1,7 @@
 package git
 
 import (
+	"errors"
 	"os/exec"
 	"strings"
 )
@@ -23,6 +24,11 @@ func HashOfHEAD() (string, error) {
 // cmdOutput executes the command specified by name and
 // returns the first line of the standard output.
 func cmdOutput(name string, args ...string) (string, error) {
-	out, err := exec.Command(name, args...).Output()
+	cmd := exec.Command(name, args...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", errors.New(string(out))
+	}
+
 	return strings.TrimRight(string(out), "\n"), err
 }

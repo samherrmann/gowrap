@@ -78,7 +78,8 @@ func initSupportedPlatforms() (*[]Platform, error) {
 
 // Generate executes the command "go generate"
 func Generate() error {
-	return exec.Command("go", "generate").Run()
+	_, err := cmdOutput("go", "generate")
+	return err
 }
 
 // Build executes the command "go build" for the desired
@@ -86,7 +87,8 @@ func Generate() error {
 // executable to the 'outDir' directory.
 func Build(args ...string) error {
 	args = append([]string{"build"}, args...)
-	return exec.Command("go", args...).Run()
+	_, err := cmdOutput("go", args...)
+	return err
 }
 
 // GoOS returns the value of GOOS
@@ -132,6 +134,11 @@ func goEnvVar(key string) (string, error) {
 // cmdOutput executes the command specified by name and
 // returns the first line of the standard output.
 func cmdOutput(name string, args ...string) (string, error) {
-	out, err := exec.Command(name, args...).Output()
+	cmd := exec.Command(name, args...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", errors.New(string(out))
+	}
+
 	return strings.TrimRight(string(out), "\n"), err
 }
