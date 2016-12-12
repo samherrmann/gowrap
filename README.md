@@ -13,8 +13,8 @@ Run in terminal:
 ```sh
 $ go get -u github.com/samherrmann/gowrap
 ```
-
-In order to use `gowrap` conveniently from any project directory, make sure that either `$GOBIN`, if it is set, or `$GOPATH/bin` is in your system `$PATH`.
+* `gowrap` requires Go version go1.7 or newer.
+* In order to use `gowrap` conveniently from any project directory, make sure that either `$GOBIN`, if it is set, or `$GOPATH/bin` is in your system `$PATH`.
 
 ## Usage
 Run in terminal:

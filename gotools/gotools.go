@@ -2,6 +2,7 @@ package gotools
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"os/exec"
 	"strings"
@@ -56,12 +57,19 @@ func initGoHostArch() (string, error) {
 
 // initSupportedPlatforms returns a list of all the target operating
 // systems and compilation architectures.
+
+// This function requires at least Go version go1.7 to be installed.
+// The 'go tool dist list' command that this function calls was introduced
+// in the following commit:
+// https://github.com/golang/go/commit/c3ecded729214abf8a146902741cd6f9d257f68c
 func initSupportedPlatforms() (*[]Platform, error) {
 	p := &[]Platform{}
 
 	out, err := exec.Command("go", "tool", "dist", "list", "-json").Output()
 	if err != nil {
-		return p, err
+		return p, errors.New("Error while getting list of supported platforms: " +
+			err.Error() +
+			". Are you running at least Go version go1.7?")
 	}
 
 	err = json.Unmarshal(out, p)
