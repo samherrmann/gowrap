@@ -13,13 +13,14 @@ import (
 func runGoBuildChain(platforms *[]gotools.Platform) (*[]string, error) {
 	paths := &[]string{}
 
+	log.Println("Running go generate...")
+	err := goGenerate()
+	if err != nil {
+		return nil, err
+	}
+
 	for _, p := range *platforms {
 		log.Println("Building " + buildName(appName, appVersion, &p) + "...")
-		err := goGenerate()
-		if err != nil {
-			return nil, err
-		}
-
 		path, err := goBuild(appName, appVersion, &p)
 		if err != nil {
 			return nil, err
