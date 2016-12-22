@@ -1,11 +1,10 @@
 package main
 
-import "log"
+import (
+	"log"
 
-const (
-	// outputRoot is the output directory
-	// for the build artifacts.
-	outputRoot = "dist"
+	"github.com/samherrmann/gowrap/app/config"
+	"github.com/samherrmann/gowrap/app/gotools"
 )
 
 var (
@@ -23,32 +22,38 @@ func main() {
 
 	appName, err = currentFolderName()
 	if err != nil {
-		log.Printf("Error while getting folder name of current working directory: %v", err)
+		log.Printf("Error getting folder name of current working directory: %v", err)
 		return
 	}
 
 	appVersion, err = gitVersion()
 	if err != nil {
-		log.Printf("Error while getting version from Git: %v", err)
+		log.Printf("Error getting version from Git: %v", err)
 		return
 	}
 
-	config := NewConfig()
-	err = config.Load()
+	c := config.New()
+	err = c.Load()
 	if err != nil {
-		log.Printf("Error while loading config: %v", err)
+		log.Printf("Error loading config: %v", err)
 		return
 	}
 
-	buildPaths, err := runGoBuildChain(config.Platforms())
+	gt, err := gotools.New(appName, appVersion, *c.Targets)
 	if err != nil {
-		log.Printf("Error while running Go build chain: %v", err)
+		log.Printf("Error setting up build environment: %v", err)
+		return
+	}
+
+	buildPaths, err := gt.RunBuildChain()
+	if err != nil {
+		log.Printf("Error running Go build chain: %v", err)
 		return
 	}
 
 	err = archiveBuilds(buildPaths)
 	if err != nil {
-		log.Printf("Error while archiving builds: %v", err)
+		log.Printf("Error archiving builds: %v", err)
 		return
 	}
 }

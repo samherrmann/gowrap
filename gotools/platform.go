@@ -15,18 +15,51 @@ const (
 // architecture. See the valid combinations of GOOS and GOARCH
 // here: https://golang.org/doc/install/source#environment
 type Platform struct {
-	GOOS   string
-	GOARCH string
+	gotools *GoTools
+
+	goos   string
+	goarch string
 }
 
-// NewPlatform returns a new Platform type,
+// Platform returns a new Platform type,
 // initialized with the local system's
 // operating system and architecture.
-func NewPlatform() *Platform {
-	return &Platform{
-		GOOS:   GOHOSTOS,
-		GOARCH: GOHOSTARCH,
+func (gt *GoTools) Platform() (*Platform, error) {
+	goos, err := gt.GOHOSTOS()
+	if err != nil {
+		return nil, err
 	}
+	goarch, err := gt.GOHOSTARCH()
+	if err != nil {
+		return nil, err
+	}
+
+	p := &Platform{
+		gotools: gt,
+		goos:    goos,
+		goarch:  goarch,
+	}
+	return p, nil
+}
+
+// GOOS returns the value of GOOS for this Platform struct.
+func (p *Platform) GOOS() string {
+	return p.goos
+}
+
+// SetGOOS sets the value for GOOS on this Platform struct.
+func (p *Platform) SetGOOS(v string) {
+	p.goos = v
+}
+
+// GOARCH returns the value of GOARCH for this Platform struct.
+func (p *Platform) GOARCH() string {
+	return p.goarch
+}
+
+// SetGOARCH sets the value for GOARCH on this Platform struct.
+func (p *Platform) SetGOARCH(v string) {
+	p.goarch = v
 }
 
 // Unmarshal parses the provided GOOS-GOARCH string and
@@ -43,18 +76,23 @@ func (p *Platform) Unmarshal(str string) error {
 	s0 := s[0]
 	s1 := s[1]
 
-	for _, sp := range *SupportedPlatforms {
-		if s0 == sp.GOOS && s1 == sp.GOARCH {
-			p.GOOS = s0
-			p.GOARCH = s1
+	sp, err := p.gotools.SupportedPlatforms()
+	if err != nil {
+		return err
+	}
+
+	for _, sp := range *sp {
+		if s0 == sp.goos && s1 == sp.goarch {
+			p.goos = s0
+			p.goarch = s1
 			return nil
 		}
 	}
 	return errors.New("The string \"" + str + "\" does not represent a supported platform")
 }
 
-// String returns a Platform struct in string notation.
-// i.e. GOOS-GOARCH
+// String returns a Platform struct in string notation
+// in the format of GOOS-GOARCH.
 func (p *Platform) String() string {
-	return p.GOOS + platformStrNotationSep + p.GOARCH
+	return p.goos + platformStrNotationSep + p.goarch
 }

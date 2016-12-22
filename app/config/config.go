@@ -1,11 +1,10 @@
-package main
+package config
 
 import (
 	"errors"
 
 	"os"
 
-	"github.com/samherrmann/gowrap/gotools"
 	"github.com/samherrmann/gowrap/jsonfile"
 )
 
@@ -13,22 +12,14 @@ const (
 	configFilePath = "gowrap.json"
 )
 
-// NewConfig returns a Config struct.
-func NewConfig() *Config {
-	t := gotools.NewPlatform()
-
-	c := &Config{
-		Targets:   &[]string{t.String()},
-		platforms: &[]gotools.Platform{},
-	}
-	return c
-}
-
 // Config represents the application configuration.
 type Config struct {
 	Targets *[]string `json:"targets"`
+}
 
-	platforms *[]gotools.Platform
+// New returns a Config struct.
+func New() *Config {
+	return new(Config)
 }
 
 // Save writes the Config struct to the
@@ -44,7 +35,7 @@ func (c *Config) Save() error {
 func (c *Config) Load() error {
 	err := jsonfile.Read(configFilePath, c)
 	if err == nil {
-		return c.validate()
+		return nil
 	}
 	if !os.IsNotExist(err) {
 		return err
@@ -57,27 +48,4 @@ func (c *Config) Load() error {
 	return errors.New("No '" + configFilePath + "' file found. " +
 		"A sample file was created in the current directory. " +
 		"Edit the file as required and re-run gowrap.")
-}
-
-// validate verifies that the target values
-// are of proper format by unmarshaling them
-// to gotools/Plaform types.
-func (c *Config) validate() error {
-	ps := &[]gotools.Platform{}
-
-	for _, t := range *c.Targets {
-		p := gotools.NewPlatform()
-		if err := p.Unmarshal(t); err != nil {
-			return err
-		}
-		*ps = append(*ps, *p)
-	}
-	c.platforms = ps
-	return nil
-}
-
-// Platforms returns the targets as a
-// gotools/Platform slice.
-func (c *Config) Platforms() *[]gotools.Platform {
-	return c.platforms
 }

@@ -15,57 +15,55 @@ const (
 	envVarKeyGOHOSTARCH = "GOHOSTARCH"
 )
 
-var (
-	// GOHOSTOS is the operating system of the host.
-	GOHOSTOS string
+// GoTools represents a Go tools environment
+type GoTools struct{}
 
-	// GOHOSTARCH the compilation architecture of the host.
-	GOHOSTARCH string
-
-	// SupportedPlatforms is a list of all the target operating
-	// systems and compilation architectures
-	SupportedPlatforms *[]Platform
-)
-
-func init() {
-	os, err := initGoHostOS()
-	if err != nil {
-		panic(err)
-	}
-	arch, err := initGoHostArch()
-	if err != nil {
-		panic(err)
-	}
-	platforms, err := initSupportedPlatforms()
-	if err != nil {
-		panic(err)
-	}
-	GOHOSTOS = os
-	GOHOSTARCH = arch
-	SupportedPlatforms = platforms
+// New returns an instance of a GoTools struct
+func New() *GoTools {
+	return new(GoTools)
 }
 
-// initGoHostOS returns the value of GOHOSTOS
-func initGoHostOS() (string, error) {
+// GOHOSTOS returns the value of GOHOSTOS
+func (gt *GoTools) GOHOSTOS() (string, error) {
 	return goEnvVar(envVarKeyGOHOSTOS)
 }
 
-// GoHostArch returns the value of GOHOSTARCH
-func initGoHostArch() (string, error) {
+// GOHOSTARCH returns the value of GOHOSTOS
+func (gt *GoTools) GOHOSTARCH() (string, error) {
 	return goEnvVar(envVarKeyGOHOSTARCH)
 }
 
-// initSupportedPlatforms returns a list of all the target operating
-// systems and compilation architectures.
+// GOOS returns the value of GOOS
+func (gt *GoTools) GOOS() (string, error) {
+	return goEnvVar(envVarKeyGOOS)
+}
 
+// SetGOOS sets the value of GOOS
+func (gt *GoTools) SetGOOS(goos string) error {
+	return os.Setenv(envVarKeyGOOS, goos)
+}
+
+// GOARCH returns the value of GOARCH
+func (gt *GoTools) GOARCH() (string, error) {
+	return goEnvVar(envVarKeyGOARCH)
+}
+
+// SetGOARCH sets the value of GOARCH
+func (gt *GoTools) SetGOARCH(goarch string) error {
+	return os.Setenv(envVarKeyGOARCH, goarch)
+}
+
+// SupportedPlatforms returns a list of all the target operating
+// systems and compilation architectures.
+//
 // This function requires at least Go version go1.7 to be installed.
 // The 'go tool dist list' command that this function calls was introduced
 // in the following commit:
 // https://github.com/golang/go/commit/c3ecded729214abf8a146902741cd6f9d257f68c
-func initSupportedPlatforms() (*[]Platform, error) {
+func (gt *GoTools) SupportedPlatforms() (*[]Platform, error) {
 	p := &[]Platform{}
 
-	out, err := exec.Command("go", "tool", "dist", "list", "-json").Output()
+	out, err := exec.Command("go", "tool", "dist", "list", "-json").CombinedOutput()
 	if err != nil {
 		return p, errors.New("Error while getting list of supported platforms: " +
 			err.Error() +
@@ -77,7 +75,7 @@ func initSupportedPlatforms() (*[]Platform, error) {
 }
 
 // Generate executes the command "go generate"
-func Generate() error {
+func (gt *GoTools) Generate() error {
 	_, err := cmdOutput("go", "generate")
 	return err
 }
@@ -85,37 +83,16 @@ func Generate() error {
 // Build executes the command "go build" for the desired
 // target OS and architecture, and writes the generated
 // executable to the 'outDir' directory.
-func Build(args ...string) error {
+func (gt *GoTools) Build(args ...string) error {
 	args = append([]string{"build"}, args...)
 	_, err := cmdOutput("go", args...)
 	return err
 }
 
-// GoOS returns the value of GOOS
-func GoOS() (string, error) {
-	return goEnvVar(envVarKeyGOOS)
-}
-
-// SetGoOS sets the value of GOOS
-func SetGoOS(goos string) error {
-	return os.Setenv(envVarKeyGOOS, goos)
-}
-
-// GoArch returns the value of GOARCH
-func GoArch() (string, error) {
-	return goEnvVar(envVarKeyGOARCH)
-}
-
-// SetGoArch sets the value of GOARCH
-func SetGoArch(goarch string) error {
-	return os.Setenv(envVarKeyGOARCH, goarch)
-}
-
 // ExeSuffix returns ".exe" if the GOOS
-// environment variable is set to
-// "windows".
-func ExeSuffix() (string, error) {
-	goos, err := GoOS()
+// environment variable is set to "windows".
+func (gt *GoTools) ExeSuffix() (string, error) {
+	goos, err := gt.GOOS()
 	if err != nil {
 		return "", err
 	}
